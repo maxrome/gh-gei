@@ -509,3 +509,4 @@ public class MigrateRepoCommandHandler : ICommandHandler<MigrateRepoCommandArgs>
         ? args.AzureStorageConnectionString
         : _environmentVariableProvider.AzureStorageConnectionString(false);
 }
+
