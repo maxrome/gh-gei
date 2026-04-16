@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -191,10 +191,13 @@ public class MigrateRepoCommandHandler : ICommandHandler<MigrateRepoCommandArgs>
 
         var (migrationState, _, warningsCount, failureReason, migrationLogUrl) = await _targetGithubApi.GetMigration(migrationId);
 
+        var checkStatusDelayStr = Environment.GetEnvironmentVariable("GH_GEI_CHECK_STATUS_DELAY_MS");
+        var delay = int.TryParse(checkStatusDelayStr, out var parsedDelay) ? parsedDelay : CHECK_STATUS_DELAY_IN_MILLISECONDS;
+
         while (RepositoryMigrationStatus.IsPending(migrationState))
         {
-            _log.LogInformation($"Migration in progress (ID: {migrationId}). State: {migrationState}. Waiting 10 seconds...");
-            await Task.Delay(10000);
+            _log.LogInformation($"Migration in progress (ID: {migrationId}). State: {migrationState}. Waiting {delay / 1000} seconds...");
+            await Task.Delay(delay);
             (migrationState, _, warningsCount, failureReason, migrationLogUrl) = await _targetGithubApi.GetMigration(migrationId);
         }
 
